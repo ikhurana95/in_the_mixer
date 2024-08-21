@@ -1,5 +1,8 @@
 from enum import StrEnum
+from typing import Dict, List
 from pydantic import BaseModel
+
+from data_models.enums import GameWeek, PlayerName
 
 
 class Position(StrEnum):
@@ -44,3 +47,14 @@ class FantasyPlayer(BaseModel):
     team: PremTeam
     position: Position
     stats: PlayerStats
+    cost: int
+
+
+class Fixtures(BaseModel):
+    home_games: Dict[PremTeam, PremTeam]
+    away_games: Dict[PremTeam, PremTeam]
+
+
+class FPLData(BaseModel):
+    players: Dict[PlayerName, FantasyPlayer]
+    fixtures: Dict[GameWeek, Fixtures]
