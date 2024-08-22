@@ -2,6 +2,7 @@ from typing import Dict
 from ortools.linear_solver import pywraplp
 
 from data_models.enums import GameWeek, PlayerName
+from data_models.expectation_models import PredictedObjectives
 from data_models.fpl_data import FPLData, FplTeam, Position, PremTeam
 from data_models.optimiser_variables import SelectionStatus
 
@@ -226,10 +227,15 @@ class InitialSquadOptimiser(FPLBaseOptimiser):
 
 class GameWeekOptimisation(FPLBaseOptimiser):
     def __init__(
-        self, fpl_data: FPLData, current_team: FplTeam, number_of_gameweeks: int
+        self,
+        fpl_data: FPLData,
+        current_team: FplTeam,
+        number_of_gameweeks: int,
+        predicted_objectives: PredictedObjectives,
     ) -> None:
         super().__init__(fpl_data, number_of_gameweeks=number_of_gameweeks)
         self.current_team = current_team
+        self.predicted_objectives = predicted_objectives
 
     def transfer_limit_constraint(self):
         for game_week, game_week_team_selection in self.team_selection_vars.items():
@@ -258,10 +264,19 @@ class GameWeekOptimisation(FPLBaseOptimiser):
 
     def print_results(self, status): ...
 
-    def add_objective(self): ...
+    def add_objective(self):
+        for game_week, game_week_team_selection in self.team_selection_vars.items():
+            for player_name, selection_status in game_week_team_selection.items():
+
+                self.objective.SetCoefficient(
+                    selection_status.in_team,
+                    self.predicted_objectives.expected_points[game_week][player_name],
+                )
+        self.objective.SetMaximization()
 
     def optimise(self):
         self.setup_solver_with_team_constraints()
+        self.transfer_limit_constraint()
         self.add_objective()
         status = self.solver.solve()
         self.print_results(status)

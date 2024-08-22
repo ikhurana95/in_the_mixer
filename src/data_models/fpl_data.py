@@ -58,3 +58,7 @@ class Fixtures(BaseModel):
 class FPLData(BaseModel):
     players: Dict[PlayerName, FantasyPlayer]
     fixtures: Dict[GameWeek, Fixtures]
+
+
+class FplTeam(BaseModel):
+    players: Dict[PlayerName, FantasyPlayer]

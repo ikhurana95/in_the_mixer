@@ -1,5 +1,5 @@
 from typing import Any
 
 PlayerName = str
-GameWeek = str
+GameWeek = int
 ORtoolsBoolVar = Any
